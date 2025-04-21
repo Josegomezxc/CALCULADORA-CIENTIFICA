@@ -1,0 +1,94 @@
+
+/* Fondo y texto general */
+QWidget {
+    background-color: #0f111a;
+    color: #f1f1f1;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 15px;
+}
+
+/* Título destacado */
+QLabel#titulo {
+    font-size: 32px;
+    font-weight: bold;
+    padding: 24px;
+    background-color: #1a1d2e;
+    border-bottom: 3px solid #00d2ff;
+    qproperty-alignment: AlignCenter;
+    color: #00d2ff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Botones principales */
+QPushButton {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #00d2ff,
+        stop:1 #3a7bd5
+    );
+    border: 2px solid transparent;
+    border-radius: 18px;
+    padding: 14px 24px;
+    margin: 12px;
+    font-size: 17px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0px 0px 10px rgba(0,210,255,0.3);
+}
+
+/* Botón hover */
+QPushButton:hover {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #3a7bd5,
+        stop:1 #00d2ff
+    );
+    border: 2px solid #00d2ff;
+    transform: scale(1.04);
+}
+
+/* Celdas de tabla (para matrices) */
+QTableWidget {
+    background-color: #1f2235;
+    border: 2px solid #2e86de;
+    color: #ffffff;
+    gridline-color: #00d2ff;
+    selection-background-color: #2e86de;
+    selection-color: white;
+    border-radius: 10px;
+}
+
+/* Encabezados de tabla */
+QHeaderView::section {
+    background-color: #2e86de;
+    color: white;
+    padding: 6px;
+    border: none;
+    font-weight: bold;
+}
+
+/* Campos de texto si se usan */
+QLineEdit {
+    background-color: #1c1f2e;
+    border: 1px solid #2e86de;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: #ffffff;
+    font-size: 15px;
+}
+
+/* Para agrupaciones o separadores */
+QGroupBox {
+    border: 2px solid #2e86de;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+    padding: 0 10px;
+    color: #00d2ff;
+    font-weight: bold;
+}
