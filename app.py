@@ -1511,19 +1511,28 @@ class CalculoSimbolico(QWidget):
         texto = texto.replace("sen", "sin")
         texto = texto.lower()
 
-        # Agrega * entre número y letra (3x → 3*x)
-        texto = re.sub(r'(\d)([a-z])', r'\1*\2', texto)
+        funciones = ['sin', 'cos', 'tan', 'exp', 'log', 'sqrt']
 
-        # Agrega * entre letra y número (x2 → x*2)
+        # Proteger funciones para evitar insertar * dentro de ellas
+        for f in funciones:
+            texto = re.sub(rf'\b{f}\(', f'__{f}__(' , texto)
+
+        # Insertar * entre número y letra o paréntesis (3x → 3*x, 2(x+1) → 2*(x+1))
+        texto = re.sub(r'(\d)([a-z\(])', r'\1*\2', texto)
+
+        # Insertar * entre letra y número (x2 → x*2)
         texto = re.sub(r'([a-z])(\d)', r'\1*\2', texto)
 
-        # Agrega * entre letras seguidas (xt → x*t)
-        texto = re.sub(r'([a-z])(?=[a-z])', r'\1*', texto)
-
-        # Agrega * entre letra y paréntesis (x( → x*()
+        # Insertar * entre letra y paréntesis (x( → x*( )
         texto = re.sub(r'([a-z])\(', r'\1*(', texto)
 
+        # Restaurar funciones protegidas
+        for f in funciones:
+            texto = texto.replace(f'__{f}__', f)
+
         return texto
+
+
 
 
     def calcular(self):
@@ -1538,6 +1547,7 @@ class CalculoSimbolico(QWidget):
             entrada_proc = self.preprocesar(entrada)
             variable = sp.Symbol(variable_str)
             expresion = sp.sympify(entrada_proc)
+
             if self.opciones.currentText() == "Derivar":
                 resultado = sp.diff(expresion, variable)
             else:
@@ -1550,6 +1560,7 @@ class CalculoSimbolico(QWidget):
             resultado_str = presentar_polinomio(resultado)
             if self.opciones.currentText() == "Integrar":
                 resultado_str += " + C"
+
             self.resultado.setText(f"Resultado:\n{resultado_str}")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"No se pudo calcular. Asegúrate de que la expresión esté bien escrita.\n\n{str(e)}")
@@ -1592,7 +1603,7 @@ class Graficas_2d_3d(QWidget):
             ('0', '0'), ('.', '.'), ('+', '+'), ('^', '**'),
             ('(', '('), (')', ')'), ('log', 'log('), ('exp', 'exp('),
             ('sin', 'sin('), ('cos', 'cos('), ('tan', 'tan('), ('√', 'sqrt('),
-            ('x', 'x'), ('y', 'y'), ('π', 'pi'), ('e', 'E')
+            ('x', 'x'), ('y', 'y'), ('π', 'pi')
         ]
 
         for i, (text, value) in enumerate(botones):
