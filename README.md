@@ -56,7 +56,7 @@ Esto generará un ejecutable llamado `app.exe` dentro de la carpeta `dist/`.
 
 ---
 
-## 🧩 Capturas de pantalla de cada módulo (descripción visual)
+## 🧩 Capturas de pantalla de cada módulo
 
 ### 🔹 Módulo Principal
 
@@ -137,18 +137,37 @@ Muestra la información académica del autor y detalles del proyecto:
 ## 📁 Estructura recomendada del proyecto
 
 ```
-calculadora-cientifica/
-│
-├── app.py
-├── styles.css
-├── images/
-│   ├── logo.png
-│   └── fondo.jpg
-├── README.md
-└── dist/
-    └── app.exe
+└── 📁app_matrices
+    └── 📁images
+        └── Acerca De.png
+        └── Derivadas.png
+        └── Determinante.png
+        └── Evaluar.png
+        └── Gráficas.png
+        └── Integrales.png
+        └── Inversa.png
+        └── Magnitud.png
+        └── Matrices.png
+        └── Multiplicar.png
+        └── Polinomios.png
+        └── Producto_Cruz.png
+        └── Producto_Punto.png
+        └── Restar.png
+        └── Sistemas Lineales.png
+        └── Sumar.png
+        └── Vectores.png
+    └── app.py
+    └── README.md
+    └── styles.css
 ```
 
 ---
 
 ¡Gracias por usar esta calculadora científica! Cualquier duda o sugerencia puede comunicarse con el autor.
+
+---
+## 📫 Contacto
+
+jgomezm10@unemi.edu.ec
+
+---
