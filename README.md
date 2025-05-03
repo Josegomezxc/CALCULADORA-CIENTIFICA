@@ -41,7 +41,7 @@ pip install pyinstaller
 Una vez instalado PyInstaller, use el siguiente comando para generar el `.exe`:
 
 ```bash
-pyinstaller --noconfirm --windowed --onefile --add-data "images;images" --add-data "styles.css;." app.py
+pyinstaller --noconfirm --windowed --onefile --add-data "images;images" --add-data "styles.css;." --icon=images/logo.ico app.py
 ```
 
 Esto generará un ejecutable llamado `app.exe` dentro de la carpeta `dist/`.
