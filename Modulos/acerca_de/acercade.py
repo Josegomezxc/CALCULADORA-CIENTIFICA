@@ -1,59 +1,110 @@
-from PyQt5.QtWidgets import *  # También importa todos los widgets
-
-# Se importan componentes del núcleo de PyQt5, como señales personalizadas y alineación
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QFrame
 from PyQt5.QtCore import Qt
-
 from Modulos.menu_general.menu_general import MenuGeneral
 
-
-
-# Incluir un apartado “Acerca de” dentro del menú principal, que muestre
-# información del autor, carrera, semestre, año académico, profesor y materia.
 class AcercaDe(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Acerca de")  # Título de la ventana
-        self.setGeometry(100, 100, 800, 600)  # Tamaño y posición de la ventana
-        self.setStyleSheet("background-color: #0f111a; color: white; font-size: 18px;")  # Estilo de la ventana
+        self.setWindowTitle("Acerca de")
+        self.setGeometry(100, 100, 800, 600)
+        # Fondo con degradado
+        self.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(
+                    x1: 0, y1: 0, x2: 1, y2: 1,
+                    stop: 0 #0a0c15, stop: 1 #1e2a44
+                );
+                color: white;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 18px;
+            }
+        """)
 
-        layout = QVBoxLayout()  # Layout principal (vertical)
+        layout = QVBoxLayout()
+        layout.setContentsMargins(20, 20, 20, 20)  # Márgenes externos
+        layout.setSpacing(20)  # Espaciado entre elementos
 
-        # Título de la sección
+        # Título
         titulo = QLabel("📘 Acerca del Proyecto")
-        titulo.setAlignment(Qt.AlignCenter)  # Centra el título
-        titulo.setStyleSheet("font-size: 30px; font-weight: bold; color: #00d2ff;")  # Estilo del título
-        layout.addWidget(titulo)  # Agrega el título al layout
+        titulo.setAlignment(Qt.AlignCenter)
+        titulo.setStyleSheet("""
+            font-size: 34px;
+            font-weight: bold;
+            color: #00d2ff;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        """)
+        layout.addWidget(titulo)
 
-        # Contenido de la sección "Acerca de"
+        # Contenedor de contenido
+        contenedor = QFrame()
+        contenedor.setStyleSheet("""
+            QFrame {
+                background-color: rgba(30, 46, 68, 0.9);
+                border-radius: 15px;
+                padding: 20px;
+                box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+            }
+        """)
+        contenedor_layout = QVBoxLayout(contenedor)
+        contenedor_layout.setContentsMargins(15, 15, 15, 15)
+
+        # Contenido
         contenido = QLabel(
-            "<b>👨‍💻 Autor:</b> Gómez Molina José Andrés<br><br>"
-            "<b>🎓 Carrera:</b> Ingeniería en Software<br><br>"
-            "<b>📚 Semestre:</b> 6° Semestre<br><br>"
-            "<b>📅 Año Académico:</b> 2025<br><br>"
-            "<b>👨‍🏫 Profesor:</b> Ing. Isidro Fabricio Morales Torres<br><br>"
+            "<b>👨‍💻 Autor:</b> Gómez Molina José Andrés<br>"
+            "<b>🎓 Carrera:</b> Ingeniería en Software<br>"
+            "<b>📚 Semestre:</b> 6° Semestre<br>"
+            "<b>📅 Año Académico:</b> 2025<br>"
+            "<b>👨‍🏫 Profesor:</b> Ing. Isidro Fabricio Morales Torres<br>"
             "<b>🧠 Materia:</b> Modelos Matemáticos y Simulación"
         )
+        contenido.setStyleSheet("""
+            font-size: 22px;
+            line-height: 1.5;
+            color: #e0e0e0;
+        """)
+        contenido.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        contenido.setWordWrap(True)
+        contenedor_layout.addWidget(contenido)
+        layout.addWidget(contenedor)
 
-        # Estilo del contenido
-        contenido.setStyleSheet("padding: 19px; font-size: 25px;")
-        contenido.setAlignment(Qt.AlignLeft | Qt.AlignTop)  # Alineación del contenido a la izquierda y arriba
-        contenido.setWordWrap(True)  # Permite que el texto se ajuste en caso de ser largo
-        layout.addWidget(contenido)  # Agrega el contenido al layout
+        # Espaciador para centrar verticalmente
+        layout.addStretch()
 
-        # Botón para volver al menú
+        # Botón Volver
         boton_volver = QPushButton("Volver al Menú")
-        boton_volver.setCursor(Qt.PointingHandCursor)  # Cambia el cursor a mano al pasar sobre el botón
-        boton_volver.setStyleSheet(
-            "background-color: #00d2ff; font-weight: bold; border-radius: 10px; padding: 10px; font-size: 18px;"
-        )  # Estilo del botón
-        boton_volver.clicked.connect(self.volver)  # Conecta el botón con la acción de volver
-        layout.addWidget(boton_volver, alignment=Qt.AlignCenter)  # Agrega el botón al layout y lo centra
+        boton_volver.setCursor(Qt.PointingHandCursor)
+        boton_volver.setStyleSheet("""
+            QPushButton {
+                background-color: #00d2ff;
+                color: white;
+                font-weight: bold;
+                font-size: 18px;
+                border-radius: 12px;
+                padding: 12px 24px;
+                border: none;
+                box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+                transition: all 0.3s ease;
+            }
+            QPushButton:hover {
+                background-color: #33eaff;
+                transform: scale(1.05);
+                box-shadow: 5px 5px 15px rgba(0, 210, 255, 0.5);
+            }
+            QPushButton:pressed {
+                background-color: #0099cc;
+                box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+            }
+        """)
+        boton_volver.clicked.connect(self.volver)
+        layout.addWidget(boton_volver, alignment=Qt.AlignCenter)
 
-        # Asigna el layout a la ventana
+        # Espaciador inferior
+        layout.addStretch()
+
         self.setLayout(layout)
 
-    # Función para volver al menú general
     def volver(self):
-        self.menu = MenuGeneral()  # Crea una instancia del menú principal
-        self.menu.show()  # Muestra el menú principal
-        self.close()  # Cierra la ventana actual
+        self.menu = MenuGeneral()
+        self.menu.show()
+        self.close()

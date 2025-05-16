@@ -298,11 +298,12 @@ class CalculadoraPolinomios(QWidget):
 
             # Operación: Multiplicación
             elif self.operacion == "Multiplicar":
-                poly_a = sp.Poly(sp.sympify(entrada_a, locals=variables_dict)).as_expr()
-                poly_b = sp.Poly(sp.sympify(entrada_b, locals=variables_dict)).as_expr()
-                resultado_expr = sp.simplify(poly_a * poly_b)
+                poly_a = sp.sympify(entrada_a, locals=variables_dict)
+                poly_b = sp.sympify(entrada_b, locals=variables_dict)
+                resultado_expr = sp.expand(poly_a * poly_b)  # ¡Aquí expandimos!
                 resultado_str = presentar_polinomio(resultado_expr)
                 self.resultado.setText(f"Resultado:\n{resultado_str}")
+
 
             # Operación: Derivada
             elif self.operacion == "Derivadas":
@@ -345,7 +346,7 @@ class CalculadoraPolinomios(QWidget):
                     x = variables_dict['x']
                     poly_a = sp.sympify(entrada_a, locals=variables_dict)
                     resultado_eval = poly_a.subs(x, valor)
-                    resultado_str = presentar_polinomio(resultado_eval)
+                    resultado_str = presentar_polinomio(round(float(resultado_eval), 2))
                     self.resultado.setText(f"Resultado:\n{resultado_str}")
                 else:
                     self.resultado.setText("Evaluación cancelada.")

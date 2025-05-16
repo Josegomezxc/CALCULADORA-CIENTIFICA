@@ -1,67 +1,68 @@
-
-from PyQt5.QtWidgets import *  # También importa todos los widgets
-
-# Se importan componentes del núcleo de PyQt5, como señales personalizadas y alineación
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
-
-# Se importa QPixmap para mostrar imágenes en la GUI
 from PyQt5.QtGui import QPixmap
-
-# from app import AcercaDe, CalculoSimbolico, Graficas_2d_3d, MenuMatrices, MenuPolinomios
 from utils.helpers import resource_path
 
-# Diseñar una interfaz gráfica amigable e intuitiva, con un menú principal que
-# permita acceder fácilmente a cada módulo de operación.
-# Esta clase define el menú principal de una calculadora científica con interfaz gráfica amigable
 class MenuGeneral(QWidget):
-    # Constructor de la clase, inicializa la ventana
     def __init__(self):
         super().__init__()
-        
-        # Configura el título, tamaño y estilo de la ventana principal
         self.setWindowTitle("🧠 Calculadora Científica")
         self.setGeometry(100, 100, 900, 600)
         self.setStyleSheet(self.estilos())
 
-        # Crea el diseño principal vertical (de arriba hacia abajo)
-        layout_principal = QVBoxLayout(self)
-        layout_principal.setContentsMargins(40, 40, 40, 40)
-        layout_principal.setSpacing(30)
-
-        # Agrega el título como etiqueta
-        titulo = QLabel("🧠 Calculadora Científica")
-        titulo.setObjectName("titulo")  # Se usará en los estilos (CSS)
-        layout_principal.addWidget(titulo)
-
-        # Crea una cuadrícula para mostrar botones de los módulos
-        grid = QGridLayout()
-        grid.setSpacing(30)
-        grid.setAlignment(Qt.AlignCenter)
-
-        # Lista de módulos con el texto del botón y la función que se ejecuta al hacer clic
-        modulos = [
+        self.modulos = [
             ("Matrices", self.abrir_matrices),
             ("Polinomios", self.abrir_polinomios),
             ("Derivadas", self.abrir_derivadas),
             ("Vectores", self.abrir_vectores),
             ("Gráficas", self.abrir_graficas),
-            ("EDOs", self.abrir_edo),
+            ("EDO", self.abrir_edo),
+            ("Vectores Propios", self.abrir_vectores_propios),
+            ("Prob y Estadistica", self.abrir_estadistica),
+            # ("Num Aleatorios", self.abrir_numeros_aleatorios),
+            ("M. Matemático", self.abrir_MM),
             ("Acerca De", self.abrir_acercade),
         ]
 
-        # Organiza las tarjetas en filas y columnas (3 por fila)
-        row, col = 0, 0
-        for texto, funcion in modulos:
-            tarjeta = self.crear_tarjeta(texto, funcion)
-            grid.addWidget(tarjeta, row, col)
-            col += 1
-            if col >= 3:
-                row += 1
-                col = 0
+        self.pagina_actual = 0
+        self.modulos_por_pagina = 6
 
-        layout_principal.addLayout(grid)
+        layout_principal = QVBoxLayout(self)
+        layout_principal.setContentsMargins(40, 40, 40, 40)
+        layout_principal.setSpacing(30)
 
-        # Botón para salir de la aplicación
+        titulo = QLabel("🧠 Calculadora Científica")
+        titulo.setObjectName("titulo")
+        layout_principal.addWidget(titulo)
+
+        # Layout horizontal para flechas y grid
+        contenedor_horizontal = QHBoxLayout()
+        contenedor_horizontal.setContentsMargins(0, 0, 0, 0)
+        contenedor_horizontal.setSpacing(0)
+
+        # Botón flecha izquierda
+        self.boton_izquierda = QPushButton()
+        self.boton_izquierda.setFixedSize(80, 200)
+        self.crear_boton_con_imagen(self.boton_izquierda, "flecha_izquierda")
+        self.boton_izquierda.clicked.connect(self.pagina_anterior)
+
+        # Botón flecha derecha
+        self.boton_derecha = QPushButton()
+        self.boton_derecha.setFixedSize(80, 200)
+        self.crear_boton_con_imagen(self.boton_derecha, "flecha_derecha")
+        self.boton_derecha.clicked.connect(self.pagina_siguiente)
+
+        # Grid para módulos
+        self.grid_modulos = QGridLayout()
+        self.grid_modulos.setSpacing(30)
+        self.grid_modulos.setAlignment(Qt.AlignCenter)
+
+        contenedor_horizontal.addWidget(self.boton_izquierda, alignment=Qt.AlignVCenter)
+        contenedor_horizontal.addLayout(self.grid_modulos)
+        contenedor_horizontal.addWidget(self.boton_derecha, alignment=Qt.AlignVCenter)
+
+        layout_principal.addLayout(contenedor_horizontal)
+
         boton_salir = QPushButton("Salir")
         boton_salir.setObjectName("botonVolver")
         boton_salir.setFixedWidth(240)
@@ -69,8 +70,55 @@ class MenuGeneral(QWidget):
         boton_salir.clicked.connect(QApplication.quit)
         layout_principal.addWidget(boton_salir, alignment=Qt.AlignCenter)
 
+        self.actualizar_grid()
 
-        # Crea una tarjeta visual con una imagen y un botón para cada módulo
+    def crear_boton_con_imagen(self, boton: QPushButton, nombre_imagen: str):
+        # Crea QLabel con imagen usando resource_path y la pone dentro del botón
+        ruta_imagen = resource_path(f"images/{nombre_imagen}.png")
+        pixmap = QPixmap(ruta_imagen).scaled(64, 128, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+
+        label_imagen = QLabel()
+        label_imagen.setPixmap(pixmap)
+        label_imagen.setAlignment(Qt.AlignCenter)
+
+        boton.setLayout(QVBoxLayout())
+        boton.layout().addWidget(label_imagen)
+        boton.setCursor(Qt.PointingHandCursor)
+        boton.setStyleSheet("border:none; background:transparent;")
+
+    def actualizar_grid(self):
+        # Limpia grid antes de llenar
+        for i in reversed(range(self.grid_modulos.count())):
+            widget = self.grid_modulos.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+
+        inicio = self.pagina_actual * self.modulos_por_pagina
+        fin = inicio + self.modulos_por_pagina
+        modulos_pagina = self.modulos[inicio:fin]
+
+        row, col = 0, 0
+        for texto, funcion in modulos_pagina:
+            tarjeta = self.crear_tarjeta(texto, funcion)
+            self.grid_modulos.addWidget(tarjeta, row, col)
+            col += 1
+            if col >= 3:
+                col = 0
+                row += 1
+
+        self.boton_izquierda.setEnabled(self.pagina_actual > 0)
+        self.boton_derecha.setEnabled(fin < len(self.modulos))
+
+    def pagina_siguiente(self):
+        if (self.pagina_actual + 1) * self.modulos_por_pagina < len(self.modulos):
+            self.pagina_actual += 1
+            self.actualizar_grid()
+
+    def pagina_anterior(self):
+        if self.pagina_actual > 0:
+            self.pagina_actual -= 1
+            self.actualizar_grid()
+
     def crear_tarjeta(self, texto, funcion):
         tarjeta = QFrame()
         tarjeta.setObjectName("tarjeta")
@@ -80,29 +128,24 @@ class MenuGeneral(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setAlignment(Qt.AlignCenter)
 
-        # Imagen que representa al módulo (se busca en la carpeta 'images/')
         imagen_label = QLabel()
         ruta_imagen = resource_path(f"images/{texto.lower()}.png")
         pixmap = QPixmap(ruta_imagen).scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-
         imagen_label.setPixmap(pixmap)
         imagen_label.setAlignment(Qt.AlignCenter)
-        
-        # Botón del módulo
+
         boton = QPushButton(texto)
         boton.setObjectName("botonTarjeta")
         boton.setCursor(Qt.PointingHandCursor)
         boton.setFixedSize(180, 60)
         boton.clicked.connect(funcion)
 
-        # Añade la imagen y el botón al diseño de la tarjeta
         layout.addWidget(imagen_label)
         layout.addSpacing(10)
         layout.addWidget(boton)
+
         return tarjeta
 
-
-    # Devuelve una cadena con estilos CSS personalizados para la interfaz
     def estilos(self):
         return """
         QWidget {
@@ -165,7 +208,7 @@ class MenuGeneral(QWidget):
         }
         """
 
-# Cada función abre una nueva ventana específica para cada módulo y cierra el menú principal
+    # Métodos para abrir módulos
     def abrir_matrices(self):
         from Modulos.matrices.matrices import MenuMatrices 
         self.ventana = MenuMatrices()
@@ -202,9 +245,32 @@ class MenuGeneral(QWidget):
         self.ventana.show()
         self.close()
         
+    def abrir_vectores_propios(self):
+        from Modulos.vectores_propios.vectores_propios import VectoresPropios 
+        self.ventana = VectoresPropios()
+        self.ventana.show()
+        self.close()
+    
+    def abrir_estadistica(self):
+        from Modulos.estadistica.estadistica import MenuEstadistica 
+        self.ventana = MenuEstadistica()
+        self.ventana.show()
+        self.close()
+        
+    # def abrir_numeros_aleatorios(self):
+    #     from Modulos.numeros_aleatorios.numeros_aleatorios import NumerosAleatorios 
+    #     self.ventana = NumerosAleatorios()
+    #     self.ventana.show()
+    #     self.close()
+        
+    def abrir_MM(self):
+        from Modulos.modelo_matematico.modelo_matematico import SimuladorSIR 
+        self.ventana = SimuladorSIR()
+        self.ventana.show()
+        self.close()
+        
     def abrir_acercade(self):
         from Modulos.acerca_de.acercade import AcercaDe
         self.ventana = AcercaDe()
         self.ventana.show()
         self.close()
-

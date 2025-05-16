@@ -406,7 +406,9 @@ class CalculadoraMatrices(QWidget):
                     raise ValueError("La matriz no tiene inversa porque su determinante es 0.")
                 resultado = inv(M1)
             elif self.operacion == "Determinante":
-                resultado = det(M1)
+                if np.isclose(det(M1), 0):
+                    raise ValueError(f"⚠️ Advertencia:\nLa matriz no tiene inversa porque su determinante es 0.")
+                resultado = round(det(M1),2)
         
         # Manejadores de errores
         except LinAlgError:

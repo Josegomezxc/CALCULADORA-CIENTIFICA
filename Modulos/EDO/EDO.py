@@ -7,6 +7,8 @@ from sympy import *
 from PyQt5.QtWidgets import QTableWidgetItem, QMessageBox
 
 from Modulos.menu_general.menu_general import MenuGeneral
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
 
 class EDO(QWidget):
     def __init__(self):
@@ -23,13 +25,13 @@ class EDO(QWidget):
         layout.addWidget(titulo)
 
         self.ecuacion_input = QTextEdit()
-        self.ecuacion_input.setPlaceholderText("Escribe la EDO como y' = f(x,y)")
+        self.ecuacion_input.setPlaceholderText("Escribe la EDO como y' = x/y")
         self.ecuacion_input.setStyleSheet("background-color: #1e1e1e; border: 1px solid #00d2ff; border-radius: 10px;")
         self.ecuacion_input.setFixedHeight(80)
         layout.addWidget(self.ecuacion_input)
 
         parametros_layout = QGridLayout()
-        labels = ["x0:", "y0:", "xf:", "h:"]
+        labels = ["x0:", "y0:", "xf(n):", "h:"]
         self.parametros = {}
         for i, label in enumerate(labels):
             lbl = QLabel(label)
@@ -44,7 +46,7 @@ class EDO(QWidget):
 
         fila_botones = QHBoxLayout()
         self.metodo_combo = QComboBox()
-        self.metodo_combo.addItems(["Euler", "Heun", "Runge-Kutta 4", "Taylor"])
+        self.metodo_combo.addItems(["Euler", "Heun", "Runge-Kutta 4", "Taylor", "Ver todas"])
         self.metodo_combo.setStyleSheet("background-color: #1e1e1e; border: 1px solid #00d2ff; color: white;")
         fila_botones.addWidget(self.metodo_combo)
 
@@ -72,13 +74,33 @@ class EDO(QWidget):
 
         self.canvas = FigureCanvas(plt.figure(facecolor='#0f111a'))
         self.canvas.setFixedWidth(600)
+        self.toolbar = NavigationToolbar(self.canvas, self)
+        layout.addWidget(self.toolbar)
+        self.toolbar.setStyleSheet("""
+            QToolBar {
+                background-color: #1e1e1e;
+                border: none;
+            }
+            QToolButton {
+                background-color: #2b2b2b;
+                border: 1px solid #00d2ff;
+                border-radius: 4px;
+                padding: 4px;
+                color: white;
+            }
+            QToolButton:hover {
+                background-color: #00d2ff;
+                color: black;
+            }
+        """)
+
         contenido_layout.addWidget(self.canvas)
 
         self.tabla = QTableWidget()
         self.tabla.setStyleSheet("background-color: #1e1e1e; border: 1px solid #00d2ff; color: white;")
         self.tabla.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.tabla.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tabla.setFixedWidth(240)  # Fija el ancho total de la tabla
+        self.tabla.setFixedWidth(600)  # Fija el ancho total de la tabla
         self.tabla.setFixedHeight(310)  # Fija la altura para evitar cambios al añadir datos
         self.tabla.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tabla.setSelectionMode(QAbstractItemView.NoSelection)
@@ -118,61 +140,70 @@ class EDO(QWidget):
 
             x0 = self.validar_entrada(self.parametros["x0:"].text(), "x0")
             y0 = self.validar_entrada(self.parametros["y0:"].text(), "y0")
-            xf = self.validar_entrada(self.parametros["xf:"].text(), "xf")
+            xf = self.validar_entrada(self.parametros["xf(n):"].text(), "xf(n)")
             h = self.validar_entrada(self.parametros["h:"].text(), "h")
 
-            x_vals = [x0]
-            y_vals = [y0]
-            x = x0
-            y = y0
+            metodo_seleccionado = self.metodo_combo.currentText()
 
-            while x <= xf:
-                if self.metodo_combo.currentText() == "Euler":
-                    y = y + h * f(x, y)
-                elif self.metodo_combo.currentText() == "Heun":
-                    k1 = f(x, y)
-                    k2 = f(x + h, y + h * k1)
-                    y = y + h * (k1 + k2) / 2
-                elif self.metodo_combo.currentText() == "Runge-Kutta 4":
-                    k1 = f(x, y)
-                    k2 = f(x + h / 2, y + h * k1 / 2)
-                    k3 = f(x + h / 2, y + h * k2 / 2)
-                    k4 = f(x + h, y + h * k3)
-                    y = y + (h / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
-                elif self.metodo_combo.currentText() == "Taylor":
-                    x_sym, y_sym = symbols('x y')
-                    f_expr = sympify(f_str)
-                    df_dx = lambdify((x_sym, y_sym), diff(f_expr, x_sym))
-                    df_dy = lambdify((x_sym, y_sym), diff(f_expr, y_sym))
-                    y = y + h * f(x, y) + (h**2 / 2) * (df_dx(x, y) + df_dy(x, y) * f(x, y))
+            metodos = ["Euler", "Heun", "Runge-Kutta 4", "Taylor"] if metodo_seleccionado == "Ver todas" else [metodo_seleccionado]
 
-                x = round(x + h, 10)
-                x_vals.append(x)
-                y_vals.append(y)
+            resultados = {}
+            x_vals = np.arange(x0, xf + h, h)
+            x_vals = np.round(x_vals, 10)
 
-            y_vals.append(y_vals[-1])
+            for metodo in metodos:
+                y = y0
+                ys = [y0]
+                for x in x_vals[:-1]:
+                    if metodo == "Euler":
+                        y = y + h * f(x, y)
+                    elif metodo == "Heun":
+                        k1 = f(x, y)
+                        k2 = f(x + h, y + h * k1)
+                        y = y + h * (k1 + k2) / 2
+                    elif metodo == "Runge-Kutta 4":
+                        k1 = f(x, y)
+                        k2 = f(x + h / 2, y + h * k1 / 2)
+                        k3 = f(x + h / 2, y + h * k2 / 2)
+                        k4 = f(x + h, y + h * k3)
+                        y = y + (h / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+                    elif metodo == "Taylor":
+                        x_sym, y_sym = symbols('x y')
+                        f_expr = sympify(f_str)
+                        df_dx = lambdify((x_sym, y_sym), diff(f_expr, x_sym))
+                        df_dy = lambdify((x_sym, y_sym), diff(f_expr, y_sym))
+                        y = y + h * f(x, y) + (h**2 / 2) * (df_dx(x, y) + df_dy(x, y) * f(x, y))
+                    ys.append(y)
+                resultados[metodo] = ys
 
-            self.tabla.setRowCount(len(x_vals) - 1)
-            self.tabla.setColumnCount(2)
-            self.tabla.setHorizontalHeaderLabels(["x", "y"])
+            # Mostrar en tabla
+            self.tabla.setRowCount(len(x_vals))
+            self.tabla.setColumnCount(len(metodos) + 1)
+            self.tabla.setHorizontalHeaderLabels(["x"] + metodos)
             self.tabla.verticalHeader().setVisible(False)
 
-            self.tabla.setColumnWidth(0, 120)
-            self.tabla.setColumnWidth(1, 120)
+            col_width = 600 // (len(metodos) + 1)
+            for col in range(len(metodos) + 1):
+                self.tabla.setColumnWidth(col, col_width)
 
-            for i in range(len(x_vals) - 1):
-                item_x = QTableWidgetItem(f"{x_vals[i]:.4f}")
-                item_y = QTableWidgetItem(f"{y_vals[i + 1]:.4f}")
-                item_x.setTextAlignment(Qt.AlignCenter)
-                item_y.setTextAlignment(Qt.AlignCenter)
-                self.tabla.setItem(i, 0, item_x)
-                self.tabla.setItem(i, 1, item_y)
+            for i, x in enumerate(x_vals):
+                self.tabla.setItem(i, 0, QTableWidgetItem(f"{x:.4f}"))
+                self.tabla.item(i, 0).setTextAlignment(Qt.AlignCenter)
+                for j, metodo in enumerate(metodos):
+                    item = QTableWidgetItem(f"{resultados[metodo][i]:.4f}")
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.tabla.setItem(i, j + 1, item)
 
+            # Graficar
             self.canvas.figure.clf()
             self.canvas.figure.set_facecolor('#0f111a')
             ax = self.canvas.figure.add_subplot(111)
-            ax.plot(x_vals, y_vals[1:], marker='o', color='#00d2ff')
-            ax.set_title("Solución Aproximada de la EDO", color="white")
+
+            colores = ['#00d2ff', '#00ff99', '#ffcc00', '#ff5050']
+            for i, metodo in enumerate(metodos):
+                ax.plot(x_vals, resultados[metodo], marker='o', label=metodo, color=colores[i % len(colores)])
+
+            ax.set_title("Soluciones Aproximadas", color="white")
             ax.set_facecolor("#1e1e1e")
             ax.tick_params(colors="white")
             ax.spines['bottom'].set_color('white')
@@ -180,6 +211,8 @@ class EDO(QWidget):
             ax.yaxis.label.set_color('white')
             ax.xaxis.label.set_color('white')
             ax.grid(True, color="#444444")
+            ax.legend(facecolor="#1e1e1e", edgecolor="white", labelcolor="white")
+
             self.canvas.draw()
 
         except Exception as e:
