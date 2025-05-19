@@ -270,7 +270,22 @@ class MonteCarlo(QWidget):
                 ax.fill_between(xs, ys1, ys2, where=(ys1 > ys2), color="#1C781C", alpha=0.2)
                 ax.fill_between(xs, ys1, ys2, where=(ys1 <= ys2), color="#502180", alpha=0.2)
 
-            ax.set_title("Monte Carlo: Área entre curvas", color="#FFFFFF")
+            # Display the resolved integral above the plot with proper formatting
+            # Convert function strings to display-friendly format (replace ** with ^, sqrt with \sqrt)
+            fx1_display = fx1_str.replace("**", "^").replace("sqrt(x)", r"\sqrt{x}") if fx1_str else ""
+            fx2_display = fx2_str.replace("**", "^").replace("sqrt(x)", r"\sqrt{x}") if fx2_str else ""
+            
+            if integral == "No disponible":
+                integral_text = r"$\int_{" + f"{a}" + r"}^{" + f"{b}" + r"} \text{No disponible} \, dx$"
+            else:
+                if fx1_str and not fx2_str:
+                    integral_text = r"$\int_{" + f"{a}" + r"}^{" + f"{b}" + r"} " + f"{fx1_display}" + r" \, dx = " + f"{integral:.6f}" + r"$"
+                elif fx2_str and not fx1_str:
+                    integral_text = r"$\int_{" + f"{a}" + r"}^{" + f"{b}" + r"} " + f"{fx2_display}" + r" \, dx = " + f"{integral:.6f}" + r"$"
+                elif fx1_str and fx2_str:
+                    integral_text = r"$\int_{" + f"{a}" + r"}^{" + f"{b}" + r"} (" + f"{fx1_display} - {fx2_display}" + r") \, dx = " + f"{integral:.6f}" + r"$"
+
+            ax.set_title(integral_text, fontsize=14, color="#FFFFFF", y=0.95)
             ax.legend()
             ax.grid(True, alpha=0.3)
             self.canvas.draw()

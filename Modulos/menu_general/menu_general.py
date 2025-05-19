@@ -6,9 +6,23 @@ from utils.helpers import resource_path
 class MenuGeneral(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("🧠 Calculadora Científica")
+        self.setWindowTitle("Calculadora Científica")
         self.setGeometry(100, 100, 900, 600)
         self.setStyleSheet(self.estilos())
+
+        # Module descriptions
+        self.descriptions = {
+            "Matrices": "Operaciones con matrices: suma, resta, multiplicación, determinantes, inversas y más.",
+            "Polinomios": "Manipulación de polinomios: suma, resta, multiplicación,derivadas, integrales y más.",
+            "Derivadas": "Cálculo simbólico de derivadas e integrales.",
+            "Vectores": "Operaciones con vectores: producto punto, cruz, magnitud y más.",
+            "Gráficas": "Visualización de funciones en 2D y 3D con herramientas interactivas.",
+            "EDO": "Resolución de ecuaciones diferenciales ordinarias.",
+            "Vectores Propios": "Cálculo de valores y vectores propios de matrices.",
+            "Prob y Estadistica": "Análisis estadístico y cálculos de probabilidad.",
+            "M. Matemático": "Simulación del modelo matemático SIR.",
+            "Acerca De": "Información sobre la calculadora científica y sus creadores."
+        }
 
         self.modulos = [
             ("Matrices", self.abrir_matrices),
@@ -19,192 +33,222 @@ class MenuGeneral(QWidget):
             ("EDO", self.abrir_edo),
             ("Vectores Propios", self.abrir_vectores_propios),
             ("Prob y Estadistica", self.abrir_estadistica),
-            # ("Num Aleatorios", self.abrir_numeros_aleatorios),
             ("M. Matemático", self.abrir_MM),
             ("Acerca De", self.abrir_acercade),
         ]
 
-        self.pagina_actual = 0
-        self.modulos_por_pagina = 6
+        # Main layout: horizontal for sidebar and content
+        layout_principal = QHBoxLayout(self)
+        layout_principal.setContentsMargins(0, 0, 20, 20)
+        layout_principal.setSpacing(0)
 
-        layout_principal = QVBoxLayout(self)
-        layout_principal.setContentsMargins(40, 40, 40, 40)
-        layout_principal.setSpacing(30)
+        # Sidebar
+        sidebar = QFrame()
+        sidebar.setObjectName("sidebar")
+        sidebar.setFixedWidth(260)  # Increased width for title visibility
+        sidebar_layout = QVBoxLayout(sidebar)
+        sidebar_layout.setContentsMargins(20, 20, 20, 20)  # Adjusted margins
+        sidebar_layout.setSpacing(12)
+        sidebar_layout.setAlignment(Qt.AlignTop)
 
-        titulo = QLabel("🧠 Calculadora Científica")
+        # Sidebar title
+        titulo = QLabel("Calculadora🖩")
         titulo.setObjectName("titulo")
-        layout_principal.addWidget(titulo)
+        sidebar_layout.addWidget(titulo)
 
-        # Layout horizontal para flechas y grid
-        contenedor_horizontal = QHBoxLayout()
-        contenedor_horizontal.setContentsMargins(0, 0, 0, 0)
-        contenedor_horizontal.setSpacing(0)
+        # Scroll area for modules
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setStyleSheet("QScrollArea { border: none; background: transparent; }")
+        scroll_content = QWidget()
+        scroll_layout = QVBoxLayout(scroll_content)
+        scroll_layout.setContentsMargins(0, 0, 0, 0)
+        scroll_layout.setSpacing(8)
 
-        # Botón flecha izquierda
-        self.boton_izquierda = QPushButton()
-        self.boton_izquierda.setFixedSize(80, 200)
-        self.crear_boton_con_imagen(self.boton_izquierda, "flecha_izquierda")
-        self.boton_izquierda.clicked.connect(self.pagina_anterior)
+        # Add module buttons
+        for texto, funcion in self.modulos:
+            button = self.crear_boton_modulo(texto, funcion)
+            # Connect hover events
+            button.enterEvent = lambda event, t=texto: self.show_description(t)
+            button.leaveEvent = lambda event: self.clear_description()
+            scroll_layout.addWidget(button)
 
-        # Botón flecha derecha
-        self.boton_derecha = QPushButton()
-        self.boton_derecha.setFixedSize(80, 200)
-        self.crear_boton_con_imagen(self.boton_derecha, "flecha_derecha")
-        self.boton_derecha.clicked.connect(self.pagina_siguiente)
+        scroll_area.setWidgetsmartphone = QScrollArea()
+        scroll_area.setWidget(scroll_content)
+        sidebar_layout.addWidget(scroll_area)
+        layout_principal.addWidget(sidebar)
 
-        # Grid para módulos
-        self.grid_modulos = QGridLayout()
-        self.grid_modulos.setSpacing(30)
-        self.grid_modulos.setAlignment(Qt.AlignCenter)
+        # Main content area
+        content_area = QFrame()
+        content_layout = QVBoxLayout(content_area)
+        content_layout.setContentsMargins(40, 40, 40, 40)
+        content_layout.setAlignment(Qt.AlignCenter)
+        content_layout.setSpacing(20)
 
-        contenedor_horizontal.addWidget(self.boton_izquierda, alignment=Qt.AlignVCenter)
-        contenedor_horizontal.addLayout(self.grid_modulos)
-        contenedor_horizontal.addWidget(self.boton_derecha, alignment=Qt.AlignVCenter)
+        # Welcome label
+        welcome_label = QLabel("Selecciona un módulo para comenzar")
+        welcome_label.setObjectName("welcome")
+        welcome_label.setAlignment(Qt.AlignCenter)
+        content_layout.addWidget(welcome_label, alignment=Qt.AlignHCenter)
 
-        layout_principal.addLayout(contenedor_horizontal)
+        # Description label
+        self.description_label = QLabel("")
+        self.description_label.setObjectName("description")
+        self.description_label.setWordWrap(True)
+        self.description_label.setFixedWidth(400)
+        self.description_label.setAlignment(Qt.AlignCenter)
+        content_layout.addWidget(self.description_label, alignment=Qt.AlignHCenter)
 
+        # Exit button
         boton_salir = QPushButton("Salir")
-        boton_salir.setObjectName("botonVolver")
-        boton_salir.setFixedWidth(240)
+        boton_salir.setObjectName("botonSalir")
+        boton_salir.setFixedWidth(200)
         boton_salir.setCursor(Qt.PointingHandCursor)
         boton_salir.clicked.connect(QApplication.quit)
-        layout_principal.addWidget(boton_salir, alignment=Qt.AlignCenter)
+        content_layout.addWidget(boton_salir, alignment=Qt.AlignHCenter)
 
-        self.actualizar_grid()
+        layout_principal.addWidget(content_area, stretch=1)
 
-    def crear_boton_con_imagen(self, boton: QPushButton, nombre_imagen: str):
-        # Crea QLabel con imagen usando resource_path y la pone dentro del botón
-        ruta_imagen = resource_path(f"images/{nombre_imagen}.png")
-        pixmap = QPixmap(ruta_imagen).scaled(64, 128, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+    def crear_boton_modulo(self, texto, funcion):
+        button = QPushButton()
+        button.setObjectName("botonModulo")
+        button.setCursor(Qt.PointingHandCursor)
+        button.setMinimumHeight(48)  # Changed to minimum height for flexibility
+        button.clicked.connect(funcion)
 
-        label_imagen = QLabel()
-        label_imagen.setPixmap(pixmap)
-        label_imagen.setAlignment(Qt.AlignCenter)
+        layout = QHBoxLayout(button)
+        layout.setContentsMargins(12, 8, 12, 8)  # Added vertical padding
+        layout.setSpacing(12)
+        layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
-        boton.setLayout(QVBoxLayout())
-        boton.layout().addWidget(label_imagen)
-        boton.setCursor(Qt.PointingHandCursor)
-        boton.setStyleSheet("border:none; background:transparent;")
-
-    def actualizar_grid(self):
-        # Limpia grid antes de llenar
-        for i in reversed(range(self.grid_modulos.count())):
-            widget = self.grid_modulos.itemAt(i).widget()
-            if widget:
-                widget.setParent(None)
-
-        inicio = self.pagina_actual * self.modulos_por_pagina
-        fin = inicio + self.modulos_por_pagina
-        modulos_pagina = self.modulos[inicio:fin]
-
-        row, col = 0, 0
-        for texto, funcion in modulos_pagina:
-            tarjeta = self.crear_tarjeta(texto, funcion)
-            self.grid_modulos.addWidget(tarjeta, row, col)
-            col += 1
-            if col >= 3:
-                col = 0
-                row += 1
-
-        self.boton_izquierda.setEnabled(self.pagina_actual > 0)
-        self.boton_derecha.setEnabled(fin < len(self.modulos))
-
-    def pagina_siguiente(self):
-        if (self.pagina_actual + 1) * self.modulos_por_pagina < len(self.modulos):
-            self.pagina_actual += 1
-            self.actualizar_grid()
-
-    def pagina_anterior(self):
-        if self.pagina_actual > 0:
-            self.pagina_actual -= 1
-            self.actualizar_grid()
-
-    def crear_tarjeta(self, texto, funcion):
-        tarjeta = QFrame()
-        tarjeta.setObjectName("tarjeta")
-        tarjeta.setFixedSize(240, 160)
-
-        layout = QVBoxLayout(tarjeta)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setAlignment(Qt.AlignCenter)
-
+        # Icon
         imagen_label = QLabel()
         ruta_imagen = resource_path(f"images/{texto.lower()}.png")
-        pixmap = QPixmap(ruta_imagen).scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        pixmap = QPixmap(ruta_imagen).scaled(28, 28, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         imagen_label.setPixmap(pixmap)
-        imagen_label.setAlignment(Qt.AlignCenter)
+        imagen_label.setFixedSize(28, 28)
 
-        boton = QPushButton(texto)
-        boton.setObjectName("botonTarjeta")
-        boton.setCursor(Qt.PointingHandCursor)
-        boton.setFixedSize(180, 60)
-        boton.clicked.connect(funcion)
+        # Text
+        texto_label = QLabel(texto)
+        texto_label.setObjectName("botonTexto")
 
         layout.addWidget(imagen_label)
-        layout.addSpacing(10)
-        layout.addWidget(boton)
+        layout.addWidget(texto_label)
+        layout.addStretch()
 
-        return tarjeta
+        return button
+
+    def show_description(self, module_name):
+        self.description_label.setText(self.descriptions.get(module_name, ""))
+
+    def clear_description(self):
+        self.description_label.setText("")
 
     def estilos(self):
         return """
         QWidget {
             background-color: #0f111a;
-            color: #f1f1f1;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            font-size: 15px;
+            color: #ffffff;
+            font-family: 'Roboto', 'Inter', sans-serif;
+        }
+
+        QFrame#sidebar {
+            background: qlineargradient(
+                x1:0, y1:0, x2:0, y2:1,
+                stop:0 #1e40af,
+                stop:1 #60a5fa
+            );
         }
 
         QLabel#titulo {
-            font-size: 30px;
-            font-weight: bold;
-            padding: 20px;
-            background-color: #1a1d2e;
-            border-bottom: 3px solid #00d2ff;
-            color: #00d2ff;
-            qproperty-alignment: AlignCenter;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            padding: 15px 0;  /* Reduced padding for better fit */
+            text-align: center;
+            font-family: 'Roboto', 'Inter', sans-serif;
         }
 
-        QFrame#tarjeta {
-            background-color: transparent;
-            border-radius: 20px;
-            border: 1px solid #2e86de;
-        }
-
-        QPushButton#botonTarjeta {
-            background-color: qlineargradient(
-                x1:0, y1:0, x2:1, y2:1,
-                stop:0 #00d2ff,
-                stop:1 #3a7bd5
-            );
+        QPushButton#botonModulo {
+            background: transparent;
             border: none;
-            border-radius: 12px;
-            padding: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            color: white;
-        }
-
-        QPushButton#botonTarjeta:hover {
-            background-color: qlineargradient(
-                x1:0, y1:0, x2:1, y2:1,
-                stop:0 #3a7bd5,
-                stop:1 #00d2ff
-            );
-            border: 2px solid #00d2ff;
-        }
-
-        QPushButton#botonVolver {
-            background-color: transparent;
-            color: #00d2ff;
+            border-radius: 12px;  /* Increased for softer corners */
+            color: #ffffff;
             font-size: 15px;
-            border: 1px solid #00d2ff;
-            padding: 10px 20px;
-            border-radius: 12px;
+            text-align: left;
         }
 
-        QPushButton#botonVolver:hover {
-            background-color: #1a1d2e;
+        QPushButton#botonModulo:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        QPushButton#botonModulo:pressed {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        QLabel#botonTexto {
+            font-size: 15px;
+            color: #ffffff;
+            font-weight: 500;
+            font-family: 'Roboto', 'Inter', sans-serif;
+        }
+
+        QLabel#welcome {
+            font-size: 22px;
+            font-weight: 500;
+            color: #60a5fa;
+            text-align: center;
+            font-family: 'Roboto', 'Inter', sans-serif;
+        }
+
+        QLabel#description {
+            font-size: 16px;
+            font-weight: 400;
+            color: #93c5fd;
+            text-align: center;
+            margin: 20px 0;
+            max-width: 400px;
+            font-family: 'Roboto', 'Inter', sans-serif;
+        }
+
+        QPushButton#botonSalir {
+            background: qlineargradient(
+                x1:0, y1:0, x2:1, y2:1,
+                stop:0 #1e40af,
+                stop:1 #60a5fa
+            );
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-family: 'Roboto', 'Inter', sans-serif;
+        }
+
+        QPushButton#botonSalir:hover {
+            background: qlineargradient(
+                x1:0, y1:0, x2:1, y2:1,
+                stop:0 #2563eb,
+                stop:1 #93c5fd
+            );
+        }
+
+        QScrollBar:vertical {
+            background: transparent;
+            width: 8px;
+            margin: 0;
+        }
+
+        QScrollBar::handle:vertical {
+            background: #93c5fd;
+            border-radius: 4px;
+            min-height: 20px;
+        }
+
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            height: 0;
         }
         """
 
@@ -256,12 +300,6 @@ class MenuGeneral(QWidget):
         self.ventana = MenuEstadistica()
         self.ventana.show()
         self.close()
-        
-    # def abrir_numeros_aleatorios(self):
-    #     from Modulos.numeros_aleatorios.numeros_aleatorios import NumerosAleatorios 
-    #     self.ventana = NumerosAleatorios()
-    #     self.ventana.show()
-    #     self.close()
         
     def abrir_MM(self):
         from Modulos.modelo_matematico.modelo_matematico import SimuladorSIR 
