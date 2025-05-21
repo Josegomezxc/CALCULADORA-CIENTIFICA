@@ -156,13 +156,13 @@ class EDO(QWidget):
     # Esta función es la que realiza el cálculo según el método seleccionado
     def calcular(self):
         # Primero, se revisa que todos los campos estén llenos
-        if not self.ecuacion_input.toPlainText().strip() or any(not box.text().strip() for box in self.parametros.values()):
+        if not self.ecuacion_input.toPlainText().strip().lower() or any(not box.text().strip().lower() for box in self.parametros.values()):
             QMessageBox.warning(self, "Advertencia", "Por favor, complete todos los campos antes de calcular.")
             return
 
         try:
             # Se toma la ecuación escrita y se prepara para que la computadora pueda entenderla
-            f_str = self.ecuacion_input.toPlainText().replace("^", "**").replace("sen", "sin")
+            f_str = self.ecuacion_input.toPlainText().replace("^", "**").replace("sen", "sin").lower()
             f = lambdify(('x', 'y'), sympify(f_str))
 
             # Se obtienen los valores numéricos ingresados por el usuario
