@@ -192,6 +192,7 @@ class CalculoSimbolico(QWidget):
     def preprocesar(self, texto):
         texto = texto.replace("^", "**")  # Cambia ^ por ** (notación de potencia)
         texto = texto.replace("sen", "sin")  # Traduce sen a sin
+        texto = texto.replace("ln", "log")  # Traduce sen a sin
         texto = texto.lower()
 
         funciones = ['sin', 'cos', 'tan', 'exp', 'log', 'sqrt']
