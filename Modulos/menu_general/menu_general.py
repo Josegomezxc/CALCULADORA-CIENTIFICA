@@ -34,6 +34,13 @@ class MenuGeneral(QWidget):
             ("Vectores Propios", self.abrir_vectores_propios),
             ("Prob y Estadistica", self.abrir_estadistica),
             ("M. Matemático", self.abrir_MM),
+            ("Regresion Lineal", self.abrir_regresion_lineal),
+            ("Regresion Lineal M", self.abrir_regresion_lineal_multiple),
+            ("Markov", self.abrir_Cadenas_Markov),
+            ("Grafos", self.abrir_Grafos),
+            ("Redes Petri", self.abrir_Redes_Petri),
+            ("Algoritmos H-MH", self.abrir_Algoritmos_H_MH),
+            ("Red Nuronal", self.abrir_Redes_Neuronales),
             ("Acerca De", self.abrir_acercade),
         ]
 
@@ -304,6 +311,48 @@ class MenuGeneral(QWidget):
     def abrir_MM(self):
         from Modulos.modelo_matematico.modelo_matematico import SimuladorSIR 
         self.ventana = SimuladorSIR()
+        self.ventana.show()
+        self.close()
+        
+    def abrir_regresion_lineal(self):
+        from Modulos.regresion_lineal.regresion_lineal import RegresionLineal
+        self.ventana = RegresionLineal()
+        self.ventana.show()
+        self.close()
+        
+    def abrir_regresion_lineal_multiple(self):
+        from Modulos.regresion_lineal.regresion_lineal_multiple import RegresionLinealMultiple
+        self.ventana = RegresionLinealMultiple()
+        self.ventana.show()
+        self.close()
+        
+    def abrir_Cadenas_Markov(self):
+        from Modulos.Cadenas_Markov.Cadenas_Markov import CadenasMarkov
+        self.ventana = CadenasMarkov()
+        self.ventana.show()
+        self.close()
+        
+    def abrir_Grafos(self):
+        from Modulos.Grafos.Grafos import Grafos
+        self.ventana = Grafos()
+        self.ventana.show()
+        self.close()
+        
+    def abrir_Redes_Petri(self):
+        from Modulos.Redes_Petri.Redes_Petri import Redes_Petri
+        self.ventana = Redes_Petri()
+        self.ventana.show()
+        self.close()
+        
+    def abrir_Algoritmos_H_MH(self):
+        from Modulos.Algoritmos.Algoritmanos_Heuristicos import Algoritmos_Heuristicos
+        self.ventana = Algoritmos_Heuristicos()
+        self.ventana.show()
+        self.close()
+        
+    def abrir_Redes_Neuronales(self):
+        from Modulos.Redes_Neuronales.Redes_Neuronales import RedNeuronal
+        self.ventana = RedNeuronal()
         self.ventana.show()
         self.close()
         
