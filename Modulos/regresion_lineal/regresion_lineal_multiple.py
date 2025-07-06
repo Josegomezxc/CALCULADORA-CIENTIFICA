@@ -17,7 +17,7 @@ class RegresionLinealMultiple(QWidget):
     def initUI(self):
         self.left_panel = QVBoxLayout()
 
-        title = QLabel("📊 REGRESIÓN LINEAL MÚLTIPLE (sin librerías)")
+        title = QLabel("📊 REGRESIÓN LINEAL MÚLTIPLE")
         title.setStyleSheet("font-size: 24px; font-weight: bold; color: cyan;")
         self.left_panel.addWidget(title)
 

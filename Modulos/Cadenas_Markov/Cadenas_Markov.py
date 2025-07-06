@@ -17,7 +17,7 @@ class CadenasMarkov(QWidget):
     def initUI(self):
         layout = QVBoxLayout()
 
-        title = QLabel("🔁 Cadenas de Markov (multiplicación directa)")
+        title = QLabel("🔁 Cadenas de Markov")
         title.setStyleSheet("font-size: 24px; font-weight: bold; color: cyan;")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)

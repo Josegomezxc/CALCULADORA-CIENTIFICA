@@ -21,6 +21,13 @@ class MenuGeneral(QWidget):
             "Vectores Propios": "Cálculo de valores y vectores propios de matrices.",
             "Prob y Estadistica": "Análisis estadístico y cálculos de probabilidad.",
             "M. Matemático": "Simulación del modelo matemático SIR.",
+            "Regresion Lineal": "Ajuste de datos con regresión lineal simple y predicción opcional.",
+            "Regresion Lineal M": "Regresión lineal múltiple con análisis predictivo multivariable.",
+            "Markov": "Procesos estocásticos usando cadenas de Markov y matrices de transición.",
+            "Grafos": "Visualización y análisis de grafos dirigidos o no dirigidos.",
+            "Redes Petri": "Modelado y análisis de sistemas mediante redes de Petri.",
+            "Algoritmos H-MH": "Solución de problemas con algoritmos heurísticos y metaheurísticos.",
+            "Red Neuronal": "Entrenamiento y prueba de redes neuronales simples.",
             "Acerca De": "Información sobre la calculadora científica y sus creadores."
         }
 
@@ -40,7 +47,7 @@ class MenuGeneral(QWidget):
             ("Grafos", self.abrir_Grafos),
             ("Redes Petri", self.abrir_Redes_Petri),
             ("Algoritmos H-MH", self.abrir_Algoritmos_H_MH),
-            ("Red Nuronal", self.abrir_Redes_Neuronales),
+            ("Red Neuronal", self.abrir_Redes_Neuronales),
             ("Acerca De", self.abrir_acercade),
         ]
 
